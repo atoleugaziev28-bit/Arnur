@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Елдер Каталогы</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#eef3fb;--card:#fff;--text:#0f1724;--muted:#556073;--accent:#2b8beb;--glass:rgba(255,255,255,0.6)
+    }
+    .dark{
+      --bg:#0b1220;--card:#121826;--text:#e9eef7;--muted:#9aa7bb;--accent:#5bb8ff;--glass:rgba(255,255,255,0.04)
+    }
+
+    body{
+      margin:0;padding:25px;font-family:Inter;background:var(--bg);color:var(--text);transition:.3s
+    }
+    header{
+      display:flex;justify-content:space-between;align-items:center;margin-bottom:20px
+    }
+    .logo{
+      background:var(--accent);
+      width:58px;height:58px;border-radius:14px;
+      display:flex;justify-content:center;align-items:center;
+      font-size:24px;font-weight:800;color:#fff;
+      box-shadow:0 6px 15px rgba(43,139,235,.3)
+    }
+    .btn{
+      padding:10px 15px;background:var(--card);border-radius:10px;
+      border:1px solid rgba(0,0,0,0.05);font-weight:600;cursor:pointer
+    }
+
+    .search input{
+      width:100%;padding:12px 15px;border-radius:12px;border:1px solid #d0d7e4;
+      outline:none;font-size:15px;background:var(--card);color:var(--text)
+    }
+
+    .grid{
+      margin-top:20px;
+      display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+      gap:20px
+    }
+    .card{
+      padding:15px;border-radius:14px;background:var(--card);
+      box-shadow:0 8px 25px rgba(0,0,0,0.08);
+      cursor:pointer;transition:.2s;position:relative
+    }
+    .card:hover{transform:translateY(-4px)}
+    .card img{width:100%;height:120px;object-fit:cover;border-radius:10px;margin-bottom:12px}
+    .pill{
+      position:absolute;top:12px;right:12px;padding:6px 10px;
+      background:var(--glass);backdrop-filter:blur(6px);
+      border-radius:10px;font-size:13px
+    }
+
+    #modal{
+      position:fixed;left:0;top:0;width:100%;height:100%;
+      display:flex;justify-content:center;align-items:center;
+      background:rgba(0,0,0,.55);visibility:hidden;opacity:0;
+      transition:.2s;z-index:999
+    }
+    #modal.show{visibility:visible;opacity:1}
+
+    .modal-body{
+      width:95%;max-width:900px;background:var(--card);border-radius:14px;
+      padding:20px;display:grid;grid-template-columns:1fr 320px;gap:15px
+    }
+    .close{position:absolute;top:25px;right:30px;font-size:18px;cursor:pointer}
+
+    .gallery img{
+      width:75px;height:55px;border-radius:8px;object-fit:cover
+    }
+
+    iframe{border-radius:10px;width:100%;height:230px}
+
+    @media(max-width:860px){
+      .modal-body{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div style="display:flex;align-items:center;gap:15px">
+    <div class="logo">Е</div>
+    <h2>Елдер Каталогы — HTML + CSS + JS</h2>
+  </div>
+
+  <button class="btn" id="themeBtn">🌙/☀️</button>
+</header>
+
+<div class="search"><input id="search" placeholder="Елді іздеу ..."></div>
+
+<section class="grid" id="grid"></section>
+
+<!-- Modal -->
+<div id="modal">
+  <div class="modal-body">
+    <div>
+      <img id="mFlag">
+      <h2 id="mName"></h2>
+      <p id="mCap"></p>
+      <p id="mReg"></p>
+      <p id="mPop"></p>
+      <p id="mLang"></p>
+      <p id="mCur"></p>
+
+      <h3>Галерея</h3>
+      <div id="gallery" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+    </div>
+
+    <div>
+      <h3>Карта</h3>
+      <iframe id="mMap"></iframe>
+    </div>
+
+    <div class="close" id="close">✕</div>
+  </div>
+</div>
+
+<script>
+const countries = [
+
+/* ---------------------- 1 ---------------------- */
+{
+  name:"Қазақстан",
+  capital:"Astana",
+  region:"Азия",
+  population:"19 000 000",
+  language:"Қазақ, Орыс",
+  currency:"KZT",
+  flag:"https://flagcdn.com/w320/kz.png",
+  pics:["https://images.unsplash.com/photo-1605487909076-2b3b15b7b4a4?auto=format&fit=crop&w=800&q=60"]
+},
+
+/* ---------------------- 2 ---------------------- */
+{
+  name:"АҚШ",
+  capital:"Washington D.C.",
+  region:"Солтүстік Америка",
+  population:"331 000 000",
+  language:"English",
+  currency:"USD",
+  flag:"https://flagcdn.com/w320/us.png",
+  pics:["https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=800&q=60"]
+},
+
+/* ---------------------- 3 ---------------------- */
+{
+  name:"Жапония",
+  capital:"Tokyo",
+  region:"Азия",
+  population:"125 000 000",
+  language:"Japanese",
+  currency:"JPY",
+  flag:"https://flagcdn.com/w320/jp.png",
+  pics:["https://images.unsplash.com/photo-1549692520-acc6669e2f0c?auto=format&fit=crop&w=800&q=60"]
+},
+
+/* ---------------------- 4 ---------------------- */
+{
+  name:"Қытай",
+  capital:"Beijing",
+  region:"Азия",
+  population:"1 402 000 000",
+  language:"Chinese",
+  currency:"CNY",
+  flag:"https://flagcdn.com/w320/cn.png",
+  pics:["https://images.unsplash.com/photo-1505738457544-376a1ac8e8c9?auto=format&fit=crop&w=800&q=60"]
+},
+
+/* ---------------------- 5 ---------------------- */
+{
+  name:"Түркия",
+  capital:"Ankara",
+  region:"Азия/Еуропа",
+  population:"84 000 000",
+  language:"Turkish",
+  currency:"TRY",
+  flag:"https://flagcdn.com/w320/tr.png",
+  pics:["https://images.unsplash.com/photo-1504610926078-a1611fed1db7?auto=format&fit=crop&w=800&q=60"]
+},
+
+/* ---------------------- 6 ---------------------- */
+{
+  name:"Германия",
+  capital:"Berlin",
+  region:"Еуропа",
+  population:"83 000 000",
+  language:"German",
+  currency:"EUR",
+  flag:"https://flagcdn.com/w320/de.png",
+  pics:["https://images.unsplash.com/photo-1509395062183-67c5ad6faff9?auto=format&fit=crop&w=800&q=60"]
+},
+
+/* ---------------------- 7 ---------------------- */
+{
+  name:"Франция",
+  capital:"Paris",
+  region:"Еуропа",
+  population:"67 000 000",
+  language:"French",
+  currency:"EUR",
+  flag:"https://flagcdn.com/w320/fr.png",
+  pics:["https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=800&q=60"]
+},
+
+/* ---------------------- 8 ---------------------- */
+{
+  name:"Испания",
+  capital:"Madrid",
+  region:"Еуропа",
+  population:"47 000 000",
+  language:"Spanish",
+  currency:"EUR",
+  flag:"https://flagcdn.com/w320/es.png",
+  pics:["https://images.unsplash.com/photo-1469920783271-4ee08a94d42d?auto=format&fit=crop&w=800&q=60"]
+},
+
+/* ---------------------- 9 ---------------------- */
+{
+  name:"Италия",
+  capital:"Rome",
+  region:"Еуропа",
+  population:"60 000 000",
+  language:"Italian",
+  currency:"EUR",
+  flag:"https://flagcdn.com/w320/it.png",
+  pics:["https://images.unsplash.com/photo-1483683804023-6ccdb62f86ef?auto=format&fit=crop&w=800&q=60"]
+},
+
+/* ---------------------- 10 ---------------------- */
+{
+  name:"Оңтүстік Корея",
+  capital:"Seoul",
+  region:"Азия",
+  population:"51 000 000",
+  language:"Korean",
+  currency:"KRW",
+  flag:"https://flagcdn.com/w320/kr.png",
+  pics:["https://images.unsplash.com/photo-1508804185872-d7badad00f7d?auto=format&fit=crop&w=800&q=60"]
+},
+
+/* ---------------------- 11 ---------------------- */
+{
+  name:"Бразилия",
+  capital:"Brasília",
+  region:"Оңтүстік Америка",
+  population:"212 000 000",
+  language:"Portuguese",
+  currency:"BRL",
+  flag:"https://flagcdn.com/w320/br.png",
+  pics:["https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=60"]
+},
+
+/* ---------------------- 12 ---------------------- */
+{
+  name:"Үндістан",
+  capital:"New Delhi",
+  region:"Азия",
+  population:"1 366 000 000",
+  language:"Hindi, English",
+  currency:"INR",
+  flag:"https://flagcdn.com/w320/in.png",
+  pics:["https://images.unsplash.com/photo-1532960401447-7dd3cda5e89a?auto=format&fit=crop&w=800&q=60"]
+},
+
+/* ---------------------- 13 ---------------------- */
+{
+  name:"Сауд Арабиясы",
+  capital:"Riyadh",
+  region:"Азия",
+  population:"35 000 000",
+  language:"Arabic",
+  currency:"SAR",
+  flag:"https://flagcdn.com/w320/sa.png",
+  pics:["https://images.unsplash.com/photo-1534213400947-42f1a49f3c28?auto=format&fit=crop&w=800&q=60"]
+},
+
+/* ---------------------- 14 ---------------------- */
+{
+  name:"Оңтүстік Африка",
+  capital:"Pretoria",
+  region:"Африка",
+  population:"59 000 000",
+  language:"English, Afrikaans",
+  currency:"ZAR",
+  flag:"https://flagcdn.com/w320/za.png",
+  pics:["https://images.unsplash.com/photo-1501612780327-45045538702b?auto=format&fit=crop&w=800&q=60"]
+}
+
+]; // END
+
+/* ----------- Render Cards ----------- */
+function render(list){
+  const g=document.getElementById("grid");
+  g.innerHTML="";
+  list.forEach((c,i)=>{
+    let div=document.createElement("div");
+    div.className="card";
+    div.innerHTML=`
+      <img src="${c.flag}">
+      <div class="pill">${c.currency}</div>
+      <h3>${c.name}</h3>
+      <p>${c.capital}</p>
+    `;
+    div.onclick=()=>openModal(c);
+    g.appendChild(div);
+  });
+}
+render(countries);
+
+/* -------- Modal -------- */
+function openModal(c){
+  modal.classList.add("show");
+  mFlag.src=c.flag;
+  mName.innerText=c.name;
+  mCap.innerText="Астана: "+c.capital;
+  mReg.innerText="Материк: "+c.region;
+  mPop.innerText="Халық саны: "+c.population;
+  mLang.innerText="Тілі: "+c.language;
+  mCur.innerText="Валюта: "+c.currency;
+
+  gallery.innerHTML="";
+  c.pics.forEach(p=>{
+    let i=document.createElement("img");
+    i.src=p;
+    gallery.appendChild(i);
+  });
+
+  mMap.src=`https://www.google.com/maps?q=${encodeURIComponent(c.capital+" "+c.name)}&output=embed`;
+}
+close.onclick=()=>modal.classList.remove("show");
+modal.onclick=e=>{if(e.target===modal)modal.classList.remove("show")};
+
+/* ------- Search ------- */
+search.oninput=()=>{
+  let q=search.value.toLowerCase();
+  render(countries.filter(c=>c.name.toLowerCase().includes(q)));
+};
+
+/* ------- Theme ------- */
+themeBtn.onclick=()=>document.documentElement.classList.toggle("dark");
+</script>
+
+</body>
+</html>
